@@ -16,20 +16,36 @@ CLIENT_ID = 'mi0i5MOCS5aAdw'
 CLIENT_SECRET = 'udwboa3H0NNqtkrD_5m5YMYw7dY'
 USER_AGENT = 'Pi Bot.v.1'
 
+#Initilize the python wrapper for the reddit API
 reddit = praw.Reddit(client_id = CLIENT_ID,
                      client_secret = CLIENT_SECRET,
                      user_agent = USER_AGENT)
-print(reddit.read_only)
+
+#Did we sucessfully initilize?
+print("Reddit api init: "+ str(reddit.read_only))
+
 #Create a copy of the Twython object with all our keys and secrets to allow easy commands.
-twitter = Twython(CONSUMER_KEY,CONSUMER_SECRET,ACCESS_KEY,ACCESS_SECRET) 
+twitter = Twython(CONSUMER_KEY,
+                  CONSUMER_SECRET,
+                  ACCESS_KEY,
+                  ACCESS_SECRET) 
 
-#Using our newly created object, utilize the update_status to send in the text passed in through CMD
-#twitter.update_status(status=sys.argv[1])
+#Did we successfully initilize?
+print("Twitter api init: " + str(bool(twitter.verify_credentials()))) 
 
-#Grab top hot submission from r/politics
+
+
+#Grab top hot submission from r/politics ignoring pinned posts by moderators
 subreddit = reddit.subreddit('politics')
-for submission in subreddit.hot(limit=1):
-    url = (submission.url)
-    twitter.update_status(status = url)
-    print("succesfully tweeted URL") 
+mods = []
+for moderator in subreddit.moderator():
+    mods.append(moderator.name)
 
+#Post a status update including the posts URL and title
+for submission in subreddit.hot(limit=3):
+        if submission.author.name in mods:
+            print("author is a r/politics mod, skipping submission")
+        else: 
+            url = (submission.url)
+            twitter.update_status(status = url + str(submission.title))
+            print("succesfully tweeted URL")
