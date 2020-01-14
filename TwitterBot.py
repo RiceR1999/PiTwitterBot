@@ -46,6 +46,6 @@ for submission in subreddit.hot(limit=3):
         if submission.author.name in mods:
             print("author is a r/politics mod, skipping submission")
         else: 
-            url = (submission.url)
-            twitter.update_status(status = url + str(submission.title))
+            url = (submission.permalink)
+            twitter.update_status(status = 'https://www.reddit.com/' + url + '  ' + str(submission.title) )
             print("succesfully tweeted URL")
