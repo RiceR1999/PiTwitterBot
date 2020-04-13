@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import praw
+import time
 from twython import Twython
 
 
@@ -22,7 +23,7 @@ reddit = praw.Reddit(client_id = CLIENT_ID,
                      user_agent = USER_AGENT)
 
 #Did we sucessfully initilize?
-print("Reddit api init: "+ str(reddit.read_only))
+print(time.ctime() + ":" + " Reddit api init: "+ str(reddit.read_only))
 
 #Create a copy of the Twython object with all our keys and secrets to allow easy commands.
 twitter = Twython(CONSUMER_KEY,
@@ -31,21 +32,63 @@ twitter = Twython(CONSUMER_KEY,
                   ACCESS_SECRET) 
 
 #Did we successfully initilize?
-print("Twitter api init: " + str(bool(twitter.verify_credentials()))) 
+print(time.ctime() + ":" + " Twitter api init: " + str(bool(twitter.verify_credentials()))) 
 
 
 
 #Grab top hot submission from r/politics ignoring pinned posts by moderators
+print(time.ctime() + ":" + " r/poliBOT is ready to initilize, do you want to continue (y/n): ")
+runString = sys.stdin.readline()
+runString = runString.strip()
+
+print("\n")
+
 subreddit = reddit.subreddit('politics')
 mods = []
-for moderator in subreddit.moderator():
-    mods.append(moderator.name)
+currentSub = []
+first = True
 
-#Post a status update including the posts URL and title
-for submission in subreddit.hot(limit=3):
+def check_new_posts():
+    for submission in subreddit.hot(limit=3):
         if submission.author.name in mods:
-            print("author is a r/politics mod, skipping submission")
-        else: 
+            print(time.ctime() + ':' + " author is a r/politics mod, skipping submission")
+        elif first is True:
+            currentSub.insert(0,submission)
             url = (submission.permalink)
-            twitter.update_status(status = 'https://www.reddit.com/' + url + '  ' + str(submission.title) )
-            print("succesfully tweeted URL")
+            twitter.update_status(status = str(submission.title) + ' ' + submission.url)
+            print(time.ctime() + ':' + " succesfully tweeted initial submission!")
+        elif submission not in currentSub:
+            currentSub.insert(0,submission)
+            currentSub.pop()
+            url = (submission.permalink)
+            twitter.update_status(status = str(submission.title) + ' ' + submission.url)
+            print(time.ctime() + ':' + " succesfully tweeted new submission!")
+        else:
+            print(time.ctime() + ':' +  " no new submissions since last check....")
+
+def populate_modlist():
+    for moderator in subreddit.moderator():
+        mods.append(moderator.name)
+
+if runString is 'y':
+
+    while runString == 'y':
+      try:
+          populate_modlist()
+          check_new_posts()
+          time.sleep(60)
+          print('\n')
+          first = False
+      except KeyboardInterrupt:
+          print("Keyboard interruption, r/poliBOT shutting down....")
+          exit()
+      except Exception as e:
+          print('Error:', e)
+          time.sleep(5)
+    
+else:
+ print("r/poliBOT exiting with no initilization.")
+ exit()
+
+
+
