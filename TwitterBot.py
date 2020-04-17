@@ -74,11 +74,17 @@ if runString is 'y':
 
     while runString == 'y':
       try:
-          populate_modlist()
-          check_new_posts()
-          time.sleep(60)
-          print('\n')
-          first = False
+          if first == True:
+              populate_modlist()
+              check_new_posts()
+              time.sleep(60)
+              print('\n')
+              first = False
+          else:
+              check_new_posts()
+              time.sleep(60)
+              print('\n')
+              
       except KeyboardInterrupt:
           print("Keyboard interruption, r/poliBOT shutting down....")
           exit()
