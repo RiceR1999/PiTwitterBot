@@ -7,4 +7,4 @@ A small twitter bot used to repost top posts on particular subreddits, built usi
 ![Bot-Example](/images/BotExample2.png)
 
 # Future Features
-Encorporate Twitters data analyitics tool in order to keep track of most referenced websites and pin a list of most referenced sites.
+Encorporate Twitters data analytics tool in order to keep track of most referenced websites and pin a list of most referenced sites.
